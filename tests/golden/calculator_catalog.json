@@ -1,0 +1,226 @@
+[
+  {
+    "name": "add",
+    "description": "Add two numbers and return the sum.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "title": "A",
+          "type": "number"
+        },
+        "b": {
+          "title": "B",
+          "type": "number"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "title": "addArguments"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "number"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "addOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "subtract",
+    "description": "Subtract b from a and return the difference.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "title": "A",
+          "type": "number"
+        },
+        "b": {
+          "title": "B",
+          "type": "number"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "title": "subtractArguments"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "number"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "subtractOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "multiply",
+    "description": "Multiply two numbers and return the product.",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "title": "A",
+          "type": "number"
+        },
+        "b": {
+          "title": "B",
+          "type": "number"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "title": "multiplyArguments"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "number"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "multiplyOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "divide",
+    "description": "Divide a by b and return the quotient. b must not be\n    zero.\n    ",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "title": "A",
+          "type": "number"
+        },
+        "b": {
+          "title": "B",
+          "type": "number"
+        }
+      },
+      "required": [
+        "a",
+        "b"
+      ],
+      "title": "divideArguments"
+    },
+    "outputSchema": {
+      "properties": {
+        "result": {
+          "title": "Result",
+          "type": "number"
+        }
+      },
+      "required": [
+        "result"
+      ],
+      "title": "divideOutput",
+      "type": "object"
+    }
+  },
+  {
+    "name": "summarize",
+    "description": "Compute count, sum, mean, minimum and maximum for a batch\n    of numbers. Use this instead of calling add repeatedly when\n    you have more than two values.\n    ",
+    "inputSchema": {
+      "type": "object",
+      "$defs": {
+        "Sample": {
+          "description": "A batch of numbers to summarize.",
+          "properties": {
+            "values": {
+              "description": "The numbers to summarize. At least one.",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 1,
+              "title": "Values",
+              "type": "array"
+            },
+            "precision": {
+              "default": 2,
+              "description": "Decimal places for the mean.",
+              "maximum": 10,
+              "minimum": 0,
+              "title": "Precision",
+              "type": "integer"
+            }
+          },
+          "required": [
+            "values"
+          ],
+          "title": "Sample",
+          "type": "object"
+        }
+      },
+      "properties": {
+        "sample": {
+          "$ref": "#/$defs/Sample"
+        }
+      },
+      "required": [
+        "sample"
+      ],
+      "title": "summarizeArguments"
+    },
+    "outputSchema": {
+      "description": "Descriptive statistics for one batch.",
+      "properties": {
+        "count": {
+          "description": "How many values were supplied.",
+          "title": "Count",
+          "type": "integer"
+        },
+        "total": {
+          "description": "Sum of the values.",
+          "title": "Total",
+          "type": "number"
+        },
+        "mean": {
+          "description": "Arithmetic mean, rounded.",
+          "title": "Mean",
+          "type": "number"
+        },
+        "smallest": {
+          "description": "Minimum value.",
+          "title": "Smallest",
+          "type": "number"
+        },
+        "largest": {
+          "description": "Maximum value.",
+          "title": "Largest",
+          "type": "number"
+        }
+      },
+      "required": [
+        "count",
+        "total",
+        "mean",
+        "smallest",
+        "largest"
+      ],
+      "title": "Summary",
+      "type": "object"
+    }
+  }
+]

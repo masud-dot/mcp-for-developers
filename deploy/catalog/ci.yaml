@@ -1,0 +1,20 @@
+# Server catalog entry.  Chapter 27.
+# catalog_hash is computed over tests/golden/*.json — approval attaches
+# to the hash, not the name, so a tool-surface change is detectable.
+
+name: ci
+identifier: com.acme.platform/ci
+version: 1.0.0
+owner: platform-team
+on_call: platform-oncall
+repository: github.com/acme/mcp-ci
+endpoint: https://mcp.acme.internal/ci
+transport: streamable-http
+protocol_revision: "2026-07-28"
+mutability: read-only
+data_classes: [build-metadata, test-results]
+scopes_required: [mcp:read]
+upstream_credentials: [ci-db-readonly]
+approved_on: 2026-08-14
+approved_by: security-review-4471
+catalog_hash: sha256:REPLACE_WITH_HASH_OF_GOLDEN_CATALOG

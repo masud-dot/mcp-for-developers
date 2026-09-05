@@ -1,0 +1,43 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync --locked
+
+      - name: lint
+        run: uv run ruff check src tests
+
+      - name: types
+        run: uv run mypy src
+
+      - name: unit
+        run: uv run pytest tests/unit -q
+
+      - name: contract
+        run: uv run pytest tests/contract -q
+
+      - name: negative
+        run: uv run pytest tests/negative -q
+
+      - name: integration
+        run: uv run pytest tests/integration -q
+
+      - name: security
+        run: uv run pytest tests/security -q
+        env:
+          MCPDEV_AUTH_SIGNING_KEY: ${{ secrets.TEST_SIGNING_KEY }}
+
+      - name: conformance (advisory)
+        continue-on-error: true
+        run: |
+          uv run python -m mcpdev.app &
+          sleep 5
+          npx -y @modelcontextprotocol/conformance server \
+            --url http://127.0.0.1:8000/mcp \
+            --expected-failures conformance-baseline.yml

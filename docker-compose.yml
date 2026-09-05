@@ -1,0 +1,21 @@
+services:
+  ops:
+    build: .
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    environment:
+      MCPDEV_ENVIRONMENT: production
+      MCPDEV_ALLOWED_HOSTS: '["mcp.example.com"]'
+      MCPDEV_OTLP_ENDPOINT: http://collector:4318/v1/traces
+      MCPDEV_REQUEST_STATE_KEY: ${MCPDEV_REQUEST_STATE_KEY:?set this}
+      MCPDEV_HANDLE_KEY: ${MCPDEV_HANDLE_KEY:?set this}
+      MCPDEV_AUTH_SIGNING_KEY: ${MCPDEV_AUTH_SIGNING_KEY:?set this}
+    ports: ["8000:8000"]
+    depends_on: [collector]
+
+  collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    command: ["--config=/etc/otel/config.yaml"]
+    volumes: ["./deploy/otel-collector.yaml:/etc/otel/config.yaml:ro"]
