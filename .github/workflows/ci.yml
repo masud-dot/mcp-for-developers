@@ -8,8 +8,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
-        with:
-          enable-cache: true
       - run: uv sync --locked
 
       # Ordered by how fast they fail. Chapter 24.
