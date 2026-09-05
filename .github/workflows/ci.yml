@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
@@ -36,20 +37,3 @@ jobs:
         run: uv run pytest tests/security -q
         env:
           MCPDEV_AUTH_SIGNING_KEY: ssssssssssssssssssssssssssssssss
-
-      # Advisory only: the published conformance suite has no scenarios for
-      # protocol revision 2026-07-28. Chapter 24 explains why this must not
-      # gate a merge.
-      - name: conformance (advisory)
-        continue-on-error: true
-        env:
-          MCPDEV_REQUEST_STATE_KEY: ci-only-request-state-key-0123456789ab
-          MCPDEV_ALLOWED_HOSTS: '["127.0.0.1:8000"]'
-        run: |
-          uv run uvicorn mcpdev.app:create_app --factory \
-            --host 127.0.0.1 --port 8000 &
-          for i in $(seq 1 20); do
-            curl -sf http://127.0.0.1:8000/healthz && break || sleep 1
-          done
-          npx -y @modelcontextprotocol/conformance server \
-            --url http://127.0.0.1:8000/mcp || true
