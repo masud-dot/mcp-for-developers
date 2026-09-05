@@ -17,10 +17,62 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "mypy>=2.3.1",
     "pytest>=9.1.1",
     "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.6",
 ]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 79          # the book holds code to 70 chars; this leaves headroom
+target-version = "py312"
+
+[tool.ruff.lint]
+# "I" (import sorting) is deliberately not selected: the book teaches its
+# own import conventions, including `import mcp_types as types`, and the
+# printed listings must match this repository exactly.
+select = ["E", "F", "UP", "B", "SIM"]
+ignore = [
+  "B008",    # Pydantic-style Field() defaults in signatures are intentional
+  "B904",    # Chapter 9 deliberately does NOT chain upstream exceptions:
+             # forwarding them leaks internal hostnames and query fragments
+  "B007",    # unpacking a fixed-arity tuple and using one element is clearer
+             # than indexing, e.g. socket.getaddrinfo in security/guards.py
+  "SIM105",  # contextlib.suppress hurts readability in teaching code
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["B017"]   # pytest.raises(Exception) is deliberate in negative tests
+
+[tool.mypy]
+python_version = "3.12"
+files = ["src"]
+ignore_missing_imports = true
+warn_unused_configs = true
+
+# Two SDK patterns this book teaches produce unavoidable mypy noise.
+# They are documented here rather than silenced at each call site.
+#
+#   union-attr : CallToolResult.content is a broad union and only
+#                TextContent carries .text. Reading it directly is safe
+#                when you know the server returns text; Chapter 12's
+#                render() is the general-purpose handler.
+#
+#   arg-type   : the SDK's documented way to constrain a tool argument is
+#                a Field() default in the signature, e.g.
+#                    limit: int = Field(default=20, ge=1, le=100)
+#                mypy sees FieldInfo where the annotation says int.
+#                Chapter 6 covers why this is the right pattern.
+disable_error_code = ["union-attr", "arg-type"]
+
+[[tool.mypy.overrides]]
+# Context is generic over its lifespan payload. The book uses the plain
+# `Context` annotation for readability, so mypy cannot see the type behind
+# ctx.request_context.lifespan_context. Parameterising it would make the
+# printed listings harder to read for no runtime benefit.
+module = "mcpdev.servers.repo"
+disable_error_code = ["attr-defined"]

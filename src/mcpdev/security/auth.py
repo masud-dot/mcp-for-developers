@@ -1,7 +1,6 @@
 """Token verification and per-tool scope enforcement."""
 
 import functools
-import time
 from collections.abc import Callable
 from typing import Any
 

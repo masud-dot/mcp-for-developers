@@ -8,8 +8,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
       - run: uv sync --locked
 
+      # Ordered by how fast they fail. Chapter 24.
       - name: lint
         run: uv run ruff check src tests
 
@@ -28,16 +31,27 @@ jobs:
       - name: integration
         run: uv run pytest tests/integration -q
 
+      # The security suite mints and verifies its own JWTs, so this only
+      # has to be a stable throwaway. It is not a credential and no
+      # repository secret is required. Keys must be >= 32 bytes.
       - name: security
         run: uv run pytest tests/security -q
         env:
-          MCPDEV_AUTH_SIGNING_KEY: ${{ secrets.TEST_SIGNING_KEY }}
+          MCPDEV_AUTH_SIGNING_KEY: ssssssssssssssssssssssssssssssss
 
+      # Advisory only: the published conformance suite has no scenarios for
+      # protocol revision 2026-07-28. Chapter 24 explains why this must not
+      # gate a merge.
       - name: conformance (advisory)
         continue-on-error: true
+        env:
+          MCPDEV_REQUEST_STATE_KEY: ci-only-request-state-key-0123456789ab
+          MCPDEV_ALLOWED_HOSTS: '["127.0.0.1:8000"]'
         run: |
-          uv run python -m mcpdev.app &
-          sleep 5
+          uv run uvicorn mcpdev.app:create_app --factory \
+            --host 127.0.0.1 --port 8000 &
+          for i in $(seq 1 20); do
+            curl -sf http://127.0.0.1:8000/healthz && break || sleep 1
+          done
           npx -y @modelcontextprotocol/conformance server \
-            --url http://127.0.0.1:8000/mcp \
-            --expected-failures conformance-baseline.yml
+            --url http://127.0.0.1:8000/mcp || true

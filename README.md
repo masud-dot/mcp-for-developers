@@ -38,12 +38,12 @@ whenever you run it:
 ```bash
 uv run python scripts/seed_builds.py builds.db
 export MCPDEV_CI_DB_PATH=builds.db
-export MCPDEV_HANDLE_KEY=$(python3 -c "import secrets;print(secrets.token_hex(16))")
-export MCPDEV_REQUEST_STATE_KEY=$(python3 -c "import secrets;print(secrets.token_hex(16))")
-export MCPDEV_AUTH_SIGNING_KEY=$(python3 -c "import secrets;print(secrets.token_hex(16))")
+export MCPDEV_HANDLE_KEY=$(python3 -c "import secrets;print(secrets.token_hex(32))")
+export MCPDEV_REQUEST_STATE_KEY=$(python3 -c "import secrets;print(secrets.token_hex(32))")
+export MCPDEV_AUTH_SIGNING_KEY=$(python3 -c "import secrets;print(secrets.token_hex(32))")
 ```
 
-Those three keys must be **identical across every replica**. The SDK generates a
+Each key must be **at least 32 bytes** — the SDK refuses to start otherwise — and **identical across every replica**. The SDK generates a
 per-process `requestState` key by default, which means approval flows fail
 intermittently across instances until you set one yourself. Chapter 14 measures
 exactly that.
@@ -80,6 +80,16 @@ deploy/                    nginx, cache hints, catalog entry
 scripts/seed_builds.py     Ch. 28   deterministic fixture
 examples/mount_two.py      Ch. 16   two servers in one ASGI app
 ```
+
+## Continuous integration
+
+`.github/workflows/ci.yml` runs eight stages, ordered by how fast they fail:
+lint, types, then the five test suites, then conformance as advisory only.
+No repository secrets are required; the security suite mints its own throwaway
+JWTs.
+
+Lint and type settings live in `pyproject.toml`, and every exception is
+documented there with the chapter that explains the convention.
 
 ## Tests
 

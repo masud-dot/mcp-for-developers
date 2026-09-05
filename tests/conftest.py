@@ -4,7 +4,7 @@ import importlib
 import json
 import sqlite3
 import time
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import Iterator
 from pathlib import Path
 
 import pytest
@@ -140,6 +140,15 @@ def token_factory(monkeypatch):
     import jwt
 
     monkeypatch.setenv("MCPDEV_AUTH_SIGNING_KEY", "s" * 32)
+    # settings is a module-level singleton built at import, so patching the
+    # environment is not enough on its own.
+    import mcpdev.config as config
+    from mcpdev.config import Settings
+
+    monkeypatch.setattr(config, "settings", Settings())
+    import mcpdev.security.auth as auth
+
+    monkeypatch.setattr(auth, "settings", config.settings)
 
     def _mint(key: str = "s" * 32, **overrides) -> str:
         claims = {

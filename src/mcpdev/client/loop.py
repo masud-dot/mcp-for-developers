@@ -1,6 +1,5 @@
 """The smallest loop that proves the protocol works."""
 
-import json
 from dataclasses import dataclass, field
 from typing import Any, Protocol
 

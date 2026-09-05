@@ -1,6 +1,5 @@
 """The Release-Readiness Copilot: three servers, one question."""
 
-import asyncio
 import sys
 from dataclasses import dataclass
 

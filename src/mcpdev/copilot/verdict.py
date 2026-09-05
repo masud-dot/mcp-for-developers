@@ -58,16 +58,21 @@ def decide(evidence: Evidence, criteria: dict[str, float]) -> Verdict:
     flaky = evidence.facts.get("flaky_tests", 0)
     if flaky > criteria["max_flaky_tests"]:
         safe = False
-        reasons.append(f"{flaky} flaky tests, limit {criteria['max_flaky_tests']}")
+        limit = criteria["max_flaky_tests"]
+        reasons.append(f"{flaky} flaky tests, limit {limit}")
     else:
         reasons.append(f"{flaky} flaky tests")
 
     files = evidence.facts.get("files_changed")
     if files is not None:
-        reasons.append(f"{files} files changed across {evidence.facts.get('commits', '?')} commits")
+        commits = evidence.facts.get("commits", "?")
+        reasons.append(
+            f"{files} files changed across {commits} commits"
+        )
         if files > criteria["max_files_changed"]:
             safe = False
-            reasons.append(f"change is larger than {criteria['max_files_changed']} files")
+            limit = criteria["max_files_changed"]
+            reasons.append(f"change is larger than {limit} files")
 
     confidence = "low" if evidence.gaps else "high"
     return Verdict(safe=safe, confidence=confidence,

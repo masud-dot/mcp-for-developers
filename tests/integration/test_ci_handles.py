@@ -1,8 +1,6 @@
 """Integration: handles across independently built servers."""
 
-import importlib
 
-import pytest
 
 
 async def test_handle_survives_a_different_instance(
